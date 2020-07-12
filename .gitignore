@@ -1,3 +1,4 @@
 /tmp/*
 /functions/__pycache__/*
 /test*.py
+/*.txt
