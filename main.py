@@ -22,6 +22,7 @@ from functions.cleanscreen import clean_screen
 from functions.inputoption import input_option
 from functions.menu import menu
 from functions.tacacsport import TacacsPort
+from functions.tacacsport import TacacsTest
 from functions.windowlogin import window_login
 from functions.windowopenfile import window_openfile
 
@@ -60,15 +61,20 @@ def main():
         if input_user == 1:
 
             ip_tacacs = input(
-                f"ingresa la direccion IP del Servidor Tacacs: ")
+                f"\n{red}Ingresa la {blue}direccion {green}IPv4 {red}del"
+                + f" {green}Servidor Tacacs+ {red}>> {green}")
 
-            port_tacacs = TacacsPort(ip_tacacs)
-            print(port_tacacs)
+            tacacsport_inputuser = TacacsPort(ip_tacacs)
 
-            device_list = window_openfile()
-            print(device_list)
+            test_porttacacs = TacacsTest(ip_tacacs, tacacsport_inputuser)
 
-            window_login()
+            if isinstance(test_porttacacs, int):
+                device_list = window_openfile()
+                print(device_list)
+                window_login()
+
+            else:
+                print()
 
         else:
             print("\n")
@@ -79,6 +85,9 @@ def main():
 
     except UnboundLocalError:
         print()
+
+    except TypeError:
+        print("No selecionaste algun archivo.")
 
     finally:
         print(f"{green}{'Fin del programa':^60}{color_reset}\n")
