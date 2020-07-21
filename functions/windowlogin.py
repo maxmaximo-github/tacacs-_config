@@ -9,7 +9,7 @@ __author__ = "Cesar Rodriguez"
 __copyright__ = "Copyright 2020"
 __credits__ = ["Cesar Rodriguez"]
 __license__ = "GPL"
-__version__ = "1.5.2"
+__version__ = "0.1.5"
 __maintainer__ = "Cesar Rodriguez"
 __email__ = "cesarrodriguezpadilla@gmail.com"
 __status__ = "Development"
@@ -26,12 +26,10 @@ from tkinter import TkVersion
 
 def data_user(event=None):
     """
-    Funcion para testear IPv4.
+    Funcion es para crear la ventana de logeo.
 
-    Esta funcion realiza el testeo de Ping.
-
-    Si el resultado es exitoso se guarda en un archivo de texto, de no ser asi
-    sino solo se anuncia que no tiene conectividad.
+    Crea una ventana que permite poner las credenciales de los dispositivos
+    de capa 2 y 3.
     """
     directory = getcwd()
 
@@ -46,63 +44,68 @@ def data_user(event=None):
     logging.destroy()
 
 
-def motion(event):
-    logging.destroy()
-    return
-
-
-def login_screen():
+def window_login():
     """
-    Funcion para testear IPv4.
+    Funcion para crear la pantalla de logeo.
 
-    Esta funcion realiza el testeo de Ping.
-
-    Si el resultado es exitoso se guarda en un archivo de texto, de no ser asi
-    sino solo se anuncia que no tiene conectividad.
+    Esta funcion crea una ventana para introducir los datos de username,
+    password y secret para ser enviados a los dispositivos cisco.
     """
     global logging, password_entry, secret_entry, username_entry
 
     directory = getcwd()
 
     logging = Tk()
-    logging.geometry("275x350")
+    logging.geometry("275x500")
     logging.title(f"LOGIN ACCESS   v.{TkVersion}")
     logging.configure(background="white")
 
     image_file = PhotoImage(file=f"{directory}/images/lapiz.png")
     imagen_label = Label(logging, image=image_file, bg="white")
-    imagen_label.place(x=65, y=190)
+    imagen_label.pack()
+    # imagen_label.place(x=65, y=190)
 
-    # Label(
-    #     logging, text="Please enter login details", bg="white",
-    #     font=("Helvtica", 15)).grid(row=0, column=0)
+    Label(
+         logging, text="Please enter login details", bg="white",
+         font=("Helvtica", 15)).pack()
+
+    Label(
+         logging, text="for L2 and L3 devices.", bg="white",
+         font=("Helvtica", 15)).pack()
+    # grid(row=0, column=0)
 
     Label(
         logging, text="Username:", bg="white",
-        font=("Helvtica", 15), fg="red").grid(row=1, column=0)
+        font=("Helvtica", 15), fg="black").pack()
+    # grid(row=1, column=0)
 
     username_entry = Entry(
             logging, bg="white",
             font=("Helvtica", 15))
-    username_entry.grid(row=2, column=0)
+    username_entry.pack()
+    # username_entry.grid(row=2, column=0)
 
     Label(
         logging, text="Password:", bg="white",
-        font=("Helvtica", 15), fg="red").grid(row=3, column=0)
+        font=("Helvtica", 15), fg="black").pack()
+    # grid(row=3, column=0)
 
     password_entry = Entry(
             logging, bg="white",
             font=("Helvtica", 15), show='●')
-    password_entry.grid(row=4, column=0)
+    password_entry.pack()
+    # password_entry.grid(row=4, column=0)
 
     Label(
         logging, text="Secret:", bg="white",
-        font=("Helvtica", 15), fg="red").grid(row=5, column=0)
+        font=("Helvtica", 15), fg="black").pack()
+    # grid(row=5, column=0)
 
     secret_entry = Entry(
             logging, bg="white",
             font=("Helvtica", 15), show='●')
-    secret_entry.grid(row=6, column=0)
+    secret_entry.pack()
+    # secret_entry.grid(row=6, column=0)
 
     login_button = Button(
             logging, command=data_user,
@@ -110,6 +113,7 @@ def login_screen():
 
     login_button.config()
     login_button.bind("<Return>", data_user)
-    login_button.grid(row=7, column=0)
+    login_button.pack()
+    # login_button.grid(row=7, column=0)
 
     logging.mainloop()

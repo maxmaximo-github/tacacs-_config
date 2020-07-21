@@ -10,7 +10,7 @@ __author__ = "Cesar Rodriguez"
 __copyright__ = "Copyright 2020"
 __credits__ = ["Cesar Rodriguez"]
 __license__ = "GPL"
-__version__ = "1.5.2"
+__version__ = "0.1.5"
 __maintainer__ = "Cesar Rodriguez"
 __email__ = "cesarrodriguezpadilla@gmail.com"
 __status__ = "Development"
@@ -19,7 +19,11 @@ __status__ = "Development"
 # Call functions
 from functions.createtmpfolder import create_tmpfolder
 from functions.cleanscreen import clean_screen
-from functions.loginscreen import login_screen
+from functions.inputoption import input_option
+from functions.menu import menu
+from functions.tacacsport import TacacsPort
+from functions.windowlogin import window_login
+from functions.windowopenfile import window_openfile
 
 
 # Colores para impresion en pantalla.
@@ -46,12 +50,35 @@ def main():
     # Limpiar pantalla
     clean_screen()
 
+    # Llamada a la funcion menu
+    menu()
+
     try:
-        login_screen()
+
+        input_user = input_option()
+
+        if input_user == 1:
+
+            ip_tacacs = input(
+                f"ingresa la direccion IP del Servidor Tacacs: ")
+
+            port_tacacs = TacacsPort(ip_tacacs)
+            print(port_tacacs)
+
+            device_list = window_openfile()
+            print(device_list)
+
+            window_login()
+
+        else:
+            print("\n")
 
     except KeyboardInterrupt:
         print(
             f"\n\n\t{red}Has detenido el {green}programa {red}con el teclado.")
+
+    except UnboundLocalError:
+        print()
 
     finally:
         print(f"{green}{'Fin del programa':^60}{color_reset}\n")
