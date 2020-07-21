@@ -18,11 +18,12 @@ __status__ = "Development"
 
 # Call functions
 from functions.createtmpfolder import create_tmpfolder
-from functions.cleanscreen import clean_screen
+from functions.cleanscreen import CleanScreen
 from functions.inputoption import input_option
 from functions.menu import menu
-from functions.tacacsport import TacacsPort
-from functions.tacacsport import TacacsTest
+from functions.tacacs import TacacsIPValidation
+from functions.tacacs import TacacsPort
+from functions.tacacs import TacacsTest
 from functions.windowlogin import window_login
 from functions.windowopenfile import window_openfile
 
@@ -49,7 +50,7 @@ def main():
     create_tmpfolder()
 
     # Limpiar pantalla
-    clean_screen()
+    CleanScreen()
 
     # Llamada a la funcion menu
     menu()
@@ -60,9 +61,12 @@ def main():
 
         if input_user == 1:
 
-            ip_tacacs = input(
-                f"\n{red}Ingresa la {blue}direccion {green}IPv4 {red}del"
-                + f" {green}Servidor Tacacs+ {red}>> {green}")
+            ip_tacacs = TacacsIPValidation()
+            print(ip_tacacs)
+            CleanScreen()
+            # ip_tacacs = input(
+            #    f"\n{red}Ingresa la {blue}direccion {green}IPv4 {red}del"
+            #    + f" {green}Servidor Tacacs+ {red}>> {green}")
 
             tacacsport_inputuser = TacacsPort(ip_tacacs)
 
