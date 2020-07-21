@@ -20,7 +20,7 @@ from os import name
 from os import system
 
 
-def clean_screen():
+def CleanScreen():
     """
     Funcion para limpiar pantalla.
 
