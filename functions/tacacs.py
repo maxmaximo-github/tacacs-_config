@@ -17,6 +17,7 @@ __status__ = "Development"
 
 
 from ipaddress import IPv4Address
+from ipaddress import IPv6Address
 from ipaddress import AddressValueError
 from nmap import PortScanner
 from functions.cleanscreen import CleanScreen
@@ -42,18 +43,32 @@ def TacacsIPValidation():
     sea correcto.
     """
     while True:
-        try:
-            ip_tacacs = input(
-                f"\n{red}Ingresa la {blue}direccion {green}IPv4 {red}del"
-                + f" {green}Servidor Tacacs+ {red}>> {green}")
-            IPv4Address(ip_tacacs)
-            break
+        ip_tacacs = input(
+            f" \n{red}Ingresa la {blue}direccion {green}IPv4 {red}del"
+            + f" {green}Servidor Tacacs+ {red}>> {green}")
 
-        except AddressValueError:
-            print(f"{ip_tacacs} no es una direccion IPv4 valida")
-            continue
+        if ":" in ip_tacacs:
+            try:
+                IPv6Address(ip_tacacs)
+                return ip_tacacs
+                break
 
-    return ip_tacacs
+            except AddressValueError:
+                print("No es una IPv6 valida.")
+                continue
+
+        elif "." in ip_tacacs:
+            try:
+                IPv4Address(ip_tacacs)
+                return ip_tacacs
+                break
+
+            except AddressValueError:
+                print("No es una IPv4 valida.")
+                continue
+
+        else:
+            print(f"{ip_tacacs} no es una direccion valida.")
 
 
 def TacacsPort(ip_tacacs):
@@ -66,19 +81,29 @@ def TacacsPort(ip_tacacs):
     try:
         while True:
             CleanScreen()
-            print(f"Tacacs Server IPv4 {ip_tacacs}")
+
+            # Print Data Input on terminal
+            print(f" {blue}{'='*45}{color_reset}")
             print(
-                f"\n{green}Tacacs+ {blue}opera en el {red}puerto {green}49/tcp"
-                + f" {blue}por {green}default.\n")
+                f"{' '*4}{green}{'DATA INPUT':^35} ")
+            print(f" {blue}{'='*45}{color_reset}")
+            print(
+                f"{' '*4}{green}{'Tacacs Server IPv4'} {red}==> "
+                + f" {green}{ip_tacacs}")
+            print(f" {blue}{'='*45}{color_reset}")
+
+            print(
+                f"\n\n {green}Tacacs+ {blue}opera en el {red}puerto"
+                + f" {green}49/tcp {blue}por {green}default.")
 
             condicion = input(
-                f"{blue}Deseas {red}configurar un {blue}Numero de"
+                f" {blue}Deseas {red}configurar un {blue}Numero de"
                 + f" {green}puerto {red}diferente: {green}y/n {red}>> {green}")
 
             if condicion == "y":
                 while True:
                     tacacsport_inputuser = input(
-                        f"Ingresa el numero del puerto: ")
+                        f"\nIngresa el numero del puerto: ")
 
                     if tacacsport_inputuser.isnumeric():
                         tacacsport_inputuser = int(tacacsport_inputuser)
@@ -118,10 +143,19 @@ def TacacsTest(ip_tacacs, tacacsport_inputuser):
     Esta funcion permite determinar si se desea cambiar el numero de puerto
     al servidor tacacs.
     """
+    if ":" in ip_tacacs:
+        version = "-6"
+
+    else:
+        version = "-4"
+
     try:
         nmap = PortScanner()
-        nmap.scan(ip_tacacs, f"22-443, {tacacsport_inputuser}")
+        nmap.scan(
+            hosts=ip_tacacs, arguments=f"{version} -p {tacacsport_inputuser}")
         port_up = nmap[ip_tacacs].has_tcp(tacacsport_inputuser)
+
+        print(port_up)
 
         if port_up is True:
             print(
@@ -132,10 +166,9 @@ def TacacsTest(ip_tacacs, tacacsport_inputuser):
 
         else:
             print(
-                f"El puerto {tacacsport_inputuser} que has elegido para"
-                + f" el servidor Tacacs con ip {ip_tacacs}"
-                + f" no se encuentra activo."
-                )
+                f" El puerto {tacacsport_inputuser} que has elegido para el")
+            print(f" servidor Tacacs con ip {ip_tacacs}")
+            print(f" no se encuentra activo.")
 
     except KeyboardInterrupt:
         print(
