@@ -15,7 +15,10 @@ __maintainer__ = "Cesar Rodriguez"
 __email__ = "cesarrodriguezpadilla@gmail.com"
 __status__ = "Development"
 
-
+from os import name
+from os import popen
+from subprocess import call
+from subprocess import STDOUT
 from ipaddress import IPv4Address
 from ipaddress import IPv6Address
 from ipaddress import AddressValueError
@@ -35,6 +38,34 @@ green = "\x1b[00;00;01;092m"
 green_blink = "\x1b[00;00;5;092m"
 
 
+def TacacsIPAlive(ip_tacacs):
+    """
+    Funcion para verificar que si esta vivo el servidor tacacs.
+
+    Esta realiza un testeo de ping a la direccion ingresada por el usuario.
+    """
+    if name == "nt":
+        reply = popen(f"ping ip -n 4").read()
+
+        if "Received = 4" and "Approximate" in reply:
+            return True
+        else:
+            return False
+
+    else:
+        reply = call(
+            f"ping -c 3 {ip_tacacs}",
+            shell=True,
+            stdout=open("/dev/null", "w"),
+            stderr=STDOUT)
+
+        if reply != 0:
+            print("No puede ser comprobada la conectividad con el servidor")
+            return False
+        else:
+            return True
+
+
 def TacacsIPValidation():
     """
     Funcion para validar IPv4 del servidor tacacs.
@@ -44,43 +75,97 @@ def TacacsIPValidation():
     """
     while True:
         ip_tacacs = input(
-            f" \n{red}Ingresa la {blue}direccion {green}IPv4 {red}del"
-            + f" {green}Servidor Tacacs+ {red}>> {green}")
+            f" \n{red}Ingresa la {blue}direccion {green}IPv4{red}/{green}v6"
+            + f" {red}del {green}Servidor Tacacs+ {red}>> {green}")
 
         if ":" in ip_tacacs:
             try:
                 IPv6Address(ip_tacacs)
-                return ip_tacacs
+                ping_validation = TacacsIPAlive(ip_tacacs)
+
+                return ip_tacacs, ping_validation
                 break
 
             except AddressValueError:
-                print("No es una IPv6 valida.")
+                print(
+                    f"{green}{ip_tacacs} {red}no es una"
+                    + f" {green}IPv6 {red}valida.")
                 continue
 
         elif "." in ip_tacacs:
             try:
                 IPv4Address(ip_tacacs)
-                return ip_tacacs
+                ping_validation = TacacsIPAlive(ip_tacacs)
+
+                return ip_tacacs, ping_validation
                 break
 
             except AddressValueError:
-                print("No es una IPv4 valida.")
+                print(
+                    f"{green}{ip_tacacs} {red}no es una"
+                    + f" {green}IPv4 {red}valida.")
                 continue
 
         else:
             print(f"{ip_tacacs} no es una direccion valida.")
 
 
-def TacacsPort(ip_tacacs):
+def TacacsPort(ip_tacacs, ping_validation):
     """
     Funcion para definir el puerto tacacs.
 
     Esta funcion permite determinar si se desea cambiar el numero de puerto
     al servidor tacacs.
     """
+    # List of possible input of user
+    list_yes = [
+        "y", "ye", "yes", "Y", "YE", "YES", "YEs", "YeS", "Yes",
+        ]
+    list_no = [
+        "n", "no", "non", "none", "N", "No", "NO", "None", "NONE"
+        ]
+
     try:
-        while True:
+        if not ping_validation:
+            print(
+                f"No pudo comprobarse la conectividad de ping con {ip_tacacs}.")
+            confirmation_err = input("Deseas continuar y/n: ")
+            # Determinar si concide una condicion de la lista "list_yes"
+            if confirmation_err in list_yes:
+                ciclo = True
+                response = "Ping Fail"
+            else:
+                ciclo = False
+                response = "Ping Success"
+
+        invalid_option = ""
+        while ciclo is not False:
+
             CleanScreen()
+
+            # Verificar si validacion es cierto para determinar si se desea
+            # continuar con la ejecucion del programa un que no se tenga
+            # conectividad Ping
+            if ping_validation:
+                response = "Ping Sucess"
+                pass
+
+            else:
+                if not response:
+                    print(response)
+                    print(
+                        f"No pudo comprobarse la conectividad de ping con {ip_tacacs}.")
+                    confirmation_err = input(
+                        "Deseas continuar de todos modos y/n: ")
+
+                    if confirmation_err in list_yes:
+                        response = "Ping Fail"
+                        pass
+
+                    else:
+                        break
+                else:
+                    response = "Ping Fail"
 
             # Print Data Input on terminal
             print(f" {blue}{'='*45}{color_reset}")
@@ -89,18 +174,27 @@ def TacacsPort(ip_tacacs):
             print(f" {blue}{'='*45}{color_reset}")
             print(
                 f"{' '*4}{green}{'Tacacs Server IPv4'} {red}==> "
-                + f" {green}{ip_tacacs}")
+                + f" {green}{ip_tacacs} {red}>> {blue}({green}{response}!!!!{blue})")
             print(f" {blue}{'='*45}{color_reset}")
 
+            # Mensaje de error si es que ingreso un dato incorrecto
+            if invalid_option:
+                print(
+                    f"\n \t {green_blink}{invalid_option}"
+                    + f" {red}no es una opcion valida.\n")
+            else:
+                print("\n")
+
+            # Message for user in screen
             print(
-                f"\n\n {green}Tacacs+ {blue}opera en el {red}puerto"
+                f" {green}Tacacs+ {blue}opera en el {red}puerto"
                 + f" {green}49/tcp {blue}por {green}default.")
 
-            condicion = input(
+            confirmation = input(
                 f" {blue}Deseas {red}configurar un {blue}Numero de"
                 + f" {green}puerto {red}diferente: {green}y/n {red}>> {green}")
 
-            if condicion == "y":
+            if confirmation in list_yes:
                 while True:
                     tacacsport_inputuser = input(
                         f"\nIngresa el numero del puerto: ")
@@ -121,12 +215,13 @@ def TacacsPort(ip_tacacs):
                     print("El puerto esta fuera del rango permitido")
                     continue
 
-            elif condicion == "n":
+            elif confirmation in list_no:
                 tacacsport_inputuser = 49
                 break
 
             else:
                 print("Has selecionado una opcion no valida.\n\n\n")
+                invalid_option = confirmation
                 continue
 
     except KeyboardInterrupt:
@@ -173,3 +268,8 @@ def TacacsTest(ip_tacacs, tacacsport_inputuser):
     except KeyboardInterrupt:
         print(
             f"\n\n\t{red}Has detenido el {green}programa {red}con el teclado.")
+
+    except KeyError:
+        CleanScreen()
+        print(
+            f" No se ha podido establer conexion con el servidor")
