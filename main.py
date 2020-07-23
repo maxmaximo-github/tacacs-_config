@@ -61,14 +61,14 @@ def main():
 
         if input_user == 1:
 
-            ip_tacacs = TacacsIPValidation()
+            ip_tacacs, ping_validation = TacacsIPValidation()
             print(ip_tacacs)
             CleanScreen()
             # ip_tacacs = input(
             #    f"\n{red}Ingresa la {blue}direccion {green}IPv4 {red}del"
             #    + f" {green}Servidor Tacacs+ {red}>> {green}")
 
-            tacacsport_inputuser = TacacsPort(ip_tacacs)
+            tacacsport_inputuser = TacacsPort(ip_tacacs, ping_validation)
 
             test_porttacacs = TacacsTest(ip_tacacs, tacacsport_inputuser)
 
