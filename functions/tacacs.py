@@ -24,6 +24,7 @@ from ipaddress import IPv6Address
 from ipaddress import AddressValueError
 from nmap import PortScanner
 from functions.cleanscreen import CleanScreen
+from functions.ipversion import IPTypeVersion
 
 
 # Colores para impresion en pantalla.
@@ -60,7 +61,6 @@ def TacacsIPAlive(ip_tacacs):
             stderr=STDOUT)
 
         if reply != 0:
-            print("No puede ser comprobada la conectividad con el servidor")
             return False
         else:
             return True
@@ -107,7 +107,7 @@ def TacacsIPValidation():
                 continue
 
         else:
-            print(f"{ip_tacacs} no es una direccion valida.")
+            print(f" \t{green}{ip_tacacs} {blue}no es una direccion valida.")
 
 
 def TacacsPort(ip_tacacs, ping_validation):
@@ -117,6 +117,8 @@ def TacacsPort(ip_tacacs, ping_validation):
     Esta funcion permite determinar si se desea cambiar el numero de puerto
     al servidor tacacs.
     """
+    version = IPTypeVersion(ip_tacacs)
+
     # List of possible input of user
     list_yes = [
         "y", "ye", "yes",
@@ -131,10 +133,21 @@ def TacacsPort(ip_tacacs, ping_validation):
 
     try:
         if not ping_validation:
+            # print(
+            #    f"No pudo comprobarse la conectividad "
+            #    + f"de ping con {ip_tacacs}.")
+            print(f" {blue}{'='*66}")
+            print(f" {green_blink} {('Precaucion '*6):^40}")
+            print(f" {blue}{'='*66}\n")
             print(
-                f"No pudo comprobarse la conectividad "
-                + f"de ping con {ip_tacacs}.")
-            confirmation_err = input("Deseas continuar y/n: ")
+                f" {red}Se ha producido el siguiente {green}Error {red}>>\n")
+            print(
+                f" {red}*** {green}{ip_tacacs} {blue}no ha respondido"
+                + f" el {green}Ping {red}***\n")
+
+            confirmation_err = input(
+                f" {blue}Deseas continuar {green}y/n {red}>> {green}")
+
             # Determinar si concide una condicion de la lista "list_yes"
             if confirmation_err in list_yes:
                 ciclo = True
@@ -146,37 +159,9 @@ def TacacsPort(ip_tacacs, ping_validation):
             ciclo = True
             response = "Ping Success"
 
-        invalid_option = ""
+        # invalid_option = ""
         while ciclo:
-
             CleanScreen()
-
-            # Verificar si validacion es cierto para determinar si se desea
-            # continuar con la ejecucion del programa un que no se tenga
-            # conectividad Ping
-            """
-            if ping_validation:
-                response = "Ping Sucess"
-                pass
-
-            else:
-                if not response:
-                    print(response)
-                    print(
-                        f"No pudo comprobarse la conectividad de "
-                        + f"ping con {ip_tacacs}.")
-                    confirmation_err = input(
-                        "Deseas continuar de todos modos y/n: ")
-
-                    if confirmation_err in list_yes:
-                        response = "Ping Fail"
-                        pass
-
-                    else:
-                        break
-                else:
-                    response = "Ping Fail"
-            """
 
             # Print Data Input on terminal
             print(f" {blue}{'='*65}{color_reset}")
@@ -185,56 +170,60 @@ def TacacsPort(ip_tacacs, ping_validation):
                 + f" {green}{'TEST':>10}")
             print(f" {blue}{'='*65}{color_reset}")
             print(
-                f"{' '*4}{green}{'Tacacs Server IPv4'} {red}==> "
+                f"{' '*4}{green}Tacacs Server IPv{version} {red}==> "
                 + f" {green}{ip_tacacs} {red}==> "
                 + f"{blue}({green}{response}!!!!{blue})")
-            print(f" {blue}{'='*65}{color_reset}")
+            print(f" {blue}{'='*65}{color_reset}\n")
 
             # Mensaje de error si es que ingreso un dato incorrecto
-            if invalid_option:
-                print(
-                    f"\n \t {green_blink}{invalid_option}"
-                    + f" {red}no es una opcion valida.\n")
-            else:
-                print("\n")
+            # if invalid_option:
+            #    print(
+            #       f"\n \t {green_blink}{invalid_option}"
+            #       + f" {red}no es una opcion valida.\n")
+            # else:
+            #    print("\n")
 
             # Message for user in screen
             print(
                 f" {green}Tacacs+ {blue}opera en el {red}puerto"
                 + f" {green}49/tcp {blue}por {green}default.")
 
-            confirmation = input(
+            confirmation_user = input(
                 f" {blue}Deseas {red}configurar un {blue}Numero de"
                 + f" {green}puerto {red}diferente: {green}y/n {red}>> {green}")
 
-            if confirmation in list_yes:
+            if confirmation_user in list_yes:
                 while True:
                     tacacsport_inputuser = input(
-                        f"\nIngresa el numero del puerto: ")
+                        f"\n {blue}Ingresa el numero del "
+                        + f"puerto {red}>> {green} ")
 
                     if tacacsport_inputuser.isnumeric():
                         tacacsport_inputuser = int(tacacsport_inputuser)
-                        break
+                        if 0 < tacacsport_inputuser < 65536:
+                            break
+                        else:
+                            print(" El puerto esta fuera del rango permitido")
+                            continue
+
                     else:
                         print(
-                            "La entrada es incorrecta. Escribe un numero "
-                            + " entero.")
+                            f"\n\t {red}{tacacsport_inputuser} "
+                            + f"{red}es una entrada {green}incorrecta.")
+                        print(
+                            f" \t{blue}Por favor {red}ingresa un "
+                            + f"{green}numero entero.")
                         continue
+                # Paro del Ciclo Principal
+                break
 
-                if 0 < tacacsport_inputuser < 65536:
-                    break
-
-                else:
-                    print("El puerto esta fuera del rango permitido")
-                    continue
-
-            elif confirmation in list_no:
+            elif confirmation_user in list_no:
                 tacacsport_inputuser = 49
+                # Paro del Ciclo Principal
                 break
 
             else:
-                print("Has selecionado una opcion no valida.\n\n\n")
-                invalid_option = confirmation
+                # Continuar en el Ciclo Principal
                 continue
 
     except KeyboardInterrupt:
@@ -251,23 +240,21 @@ def TacacsTest(ip_tacacs, tacacsport_inputuser):
     Esta funcion permite determinar si se desea cambiar el numero de puerto
     al servidor tacacs.
     """
-    if ":" in ip_tacacs:
-        version = "-6"
-
-    else:
-        version = "-4"
+    version = IPTypeVersion(ip_tacacs)
 
     try:
         nmap = PortScanner()
         nmap.scan(
-            hosts=ip_tacacs, arguments=f"{version} -p {tacacsport_inputuser}")
+            hosts=ip_tacacs,
+            arguments=f"-{version} -p 22-443, {tacacsport_inputuser}")
+
         port_up = nmap[ip_tacacs].has_tcp(tacacsport_inputuser)
 
         print(port_up)
 
         if port_up is True:
             print(
-                f"El servidor {ip_tacacs} tiene el puerto"
+                f"El servidor Tacacs IPv{version} {ip_tacacs} tiene el puerto"
                 + f"{tacacsport_inputuser} activo."
                 )
             return tacacsport_inputuser
@@ -275,7 +262,7 @@ def TacacsTest(ip_tacacs, tacacsport_inputuser):
         else:
             print(
                 f" El puerto {tacacsport_inputuser} que has elegido para el")
-            print(f" servidor Tacacs con ip {ip_tacacs}")
+            print(f" servidor Tacacs con IPv{version} {ip_tacacs}")
             print(f" no se encuentra activo.")
 
     except KeyboardInterrupt:
