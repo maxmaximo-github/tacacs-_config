@@ -119,16 +119,21 @@ def TacacsPort(ip_tacacs, ping_validation):
     """
     # List of possible input of user
     list_yes = [
-        "y", "ye", "yes", "Y", "YE", "YES", "YEs", "YeS", "Yes",
+        "y", "ye", "yes",
+        "Y", "YE", "YES",
+        "YEs", "YeS", "Yes",
         ]
     list_no = [
-        "n", "no", "non", "none", "N", "No", "NO", "None", "NONE"
+        "n", "no", "non",
+        "none", "N", "No",
+        "NO", "None", "NONE"
         ]
 
     try:
         if not ping_validation:
             print(
-                f"No pudo comprobarse la conectividad de ping con {ip_tacacs}.")
+                f"No pudo comprobarse la conectividad "
+                + f"de ping con {ip_tacacs}.")
             confirmation_err = input("Deseas continuar y/n: ")
             # Determinar si concide una condicion de la lista "list_yes"
             if confirmation_err in list_yes:
@@ -136,16 +141,20 @@ def TacacsPort(ip_tacacs, ping_validation):
                 response = "Ping Fail"
             else:
                 ciclo = False
-                response = "Ping Success"
+
+        else:
+            ciclo = True
+            response = "Ping Success"
 
         invalid_option = ""
-        while ciclo is not False:
+        while ciclo:
 
             CleanScreen()
 
             # Verificar si validacion es cierto para determinar si se desea
             # continuar con la ejecucion del programa un que no se tenga
             # conectividad Ping
+            """
             if ping_validation:
                 response = "Ping Sucess"
                 pass
@@ -154,7 +163,8 @@ def TacacsPort(ip_tacacs, ping_validation):
                 if not response:
                     print(response)
                     print(
-                        f"No pudo comprobarse la conectividad de ping con {ip_tacacs}.")
+                        f"No pudo comprobarse la conectividad de "
+                        + f"ping con {ip_tacacs}.")
                     confirmation_err = input(
                         "Deseas continuar de todos modos y/n: ")
 
@@ -166,16 +176,19 @@ def TacacsPort(ip_tacacs, ping_validation):
                         break
                 else:
                     response = "Ping Fail"
+            """
 
             # Print Data Input on terminal
-            print(f" {blue}{'='*45}{color_reset}")
+            print(f" {blue}{'='*65}{color_reset}")
             print(
-                f"{' '*4}{green}{'DATA INPUT':^35} ")
-            print(f" {blue}{'='*45}{color_reset}")
+                f"{' '*4}{green}{'DATA INPUT':^35} {red}{'==>'} "
+                + f" {green}{'TEST':>10}")
+            print(f" {blue}{'='*65}{color_reset}")
             print(
                 f"{' '*4}{green}{'Tacacs Server IPv4'} {red}==> "
-                + f" {green}{ip_tacacs} {red}>> {blue}({green}{response}!!!!{blue})")
-            print(f" {blue}{'='*45}{color_reset}")
+                + f" {green}{ip_tacacs} {red}==> "
+                + f"{blue}({green}{response}!!!!{blue})")
+            print(f" {blue}{'='*65}{color_reset}")
 
             # Mensaje de error si es que ingreso un dato incorrecto
             if invalid_option:
