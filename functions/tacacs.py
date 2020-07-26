@@ -110,7 +110,64 @@ def TacacsIPValidation():
             print(f" \t{green}{ip_tacacs} {blue}no es una direccion valida.")
 
 
-def TacacsPort(ip_tacacs, ping_validation):
+def TacacsMenu():
+    """
+    Funcion para la creacion del menu.
+
+    Esta funcion crea un menu de testeo.
+    """
+
+def TacacsConfirmation(ip_tacacs, ping_validation):
+    """
+    Funcion para continuar si existe un error.
+
+    Esta funcion determina si se continua o no en un erro producido al
+    realizar pruebas de conectividad.
+    """
+    # List of possible input of user
+    list_secuences = [
+        [
+            "y", "ye", "yes",
+            "Y", "YE", "YES",
+            "YEs", "YeS", "Yes"
+        ],
+        [
+            "n", "no", "non",
+            "none", "N", "No",
+            "NO", "None", "NONE"
+        ]]
+
+    if not ping_validation:
+        # print(
+        #    f"No pudo comprobarse la conectividad "
+        #    + f"de ping con {ip_tacacs}.")
+        print(f" {blue}{'='*66}")
+        print(f" {green_blink} {('Precaucion '*6):^40}")
+        print(f" {blue}{'='*66}\n")
+        print(
+            f" {red}Se ha producido el siguiente {green}Error {red}>>\n")
+        print(
+            f" {red}*** {green}{ip_tacacs} {blue}no ha respondido"
+            + f" el {green}Ping {red}***\n")
+
+        confirmation_err = input(
+            f" {blue}Deseas continuar {green}y/n {red}>> {green}")
+
+        # Determinar si concide una condicion de la lista "list_yes"
+        if confirmation_err in list_secuences[0]:
+            cyclo = True
+            response = "Ping Fail"
+            return cyclo, response
+        # else:
+        #    cyclo = False
+
+    else:
+        cyclo = True
+        response = "Ping Success"
+        return cyclo, response
+
+
+def TacacsPort(ip_tacacs, ping_validation, cycle, response):
     """
     Funcion para definir el puerto tacacs.
 
@@ -120,18 +177,23 @@ def TacacsPort(ip_tacacs, ping_validation):
     version = IPTypeVersion(ip_tacacs)
 
     # List of possible input of user
-    list_yes = [
-        "y", "ye", "yes",
-        "Y", "YE", "YES",
-        "YEs", "YeS", "Yes",
-        ]
-    list_no = [
-        "n", "no", "non",
-        "none", "N", "No",
-        "NO", "None", "NONE"
-        ]
+    list_secuences = [
+        [
+            "y", "ye", "yes",
+            "Y", "YE", "YES",
+            "YEs", "YeS", "Yes"
+        ],
+        [
+            "n", "no", "non",
+            "none", "N", "No",
+            "NO", "None", "NONE"
+        ]]
+    # list_no = [
+    #
+    #    ]
 
     try:
+        """
         if not ping_validation:
             # print(
             #    f"No pudo comprobarse la conectividad "
@@ -149,7 +211,7 @@ def TacacsPort(ip_tacacs, ping_validation):
                 f" {blue}Deseas continuar {green}y/n {red}>> {green}")
 
             # Determinar si concide una condicion de la lista "list_yes"
-            if confirmation_err in list_yes:
+            if confirmation_err in list_secuences[0]:
                 ciclo = True
                 response = "Ping Fail"
             else:
@@ -158,9 +220,10 @@ def TacacsPort(ip_tacacs, ping_validation):
         else:
             ciclo = True
             response = "Ping Success"
+        """
 
         # invalid_option = ""
-        while ciclo:
+        while cycle:
             CleanScreen()
 
             # Print Data Input on terminal
@@ -175,15 +238,6 @@ def TacacsPort(ip_tacacs, ping_validation):
                 + f"{blue}({green}{response}!!!!{blue})")
             print(f" {blue}{'='*65}{color_reset}\n")
 
-            # Mensaje de error si es que ingreso un dato incorrecto
-            # if invalid_option:
-            #    print(
-            #       f"\n \t {green_blink}{invalid_option}"
-            #       + f" {red}no es una opcion valida.\n")
-            # else:
-            #    print("\n")
-
-            # Message for user in screen
             print(
                 f" {green}Tacacs+ {blue}opera en el {red}puerto"
                 + f" {green}49/tcp {blue}por {green}default.")
@@ -192,7 +246,7 @@ def TacacsPort(ip_tacacs, ping_validation):
                 f" {blue}Deseas {red}configurar un {blue}Numero de"
                 + f" {green}puerto {red}diferente: {green}y/n {red}>> {green}")
 
-            if confirmation_user in list_yes:
+            if confirmation_user in list_secuences[0]:
                 while True:
                     tacacsport_inputuser = input(
                         f"\n {blue}Ingresa el numero del "
@@ -217,7 +271,7 @@ def TacacsPort(ip_tacacs, ping_validation):
                 # Paro del Ciclo Principal
                 break
 
-            elif confirmation_user in list_no:
+            elif confirmation_user in list_secuences[1]:
                 tacacsport_inputuser = 49
                 # Paro del Ciclo Principal
                 break
@@ -250,8 +304,6 @@ def TacacsTest(ip_tacacs, tacacsport_inputuser):
 
         port_up = nmap[ip_tacacs].has_tcp(tacacsport_inputuser)
 
-        print(port_up)
-
         if port_up is True:
             print(
                 f"El servidor Tacacs IPv{version} {ip_tacacs} tiene el puerto"
@@ -261,9 +313,24 @@ def TacacsTest(ip_tacacs, tacacsport_inputuser):
 
         else:
             print(
-                f" El puerto {tacacsport_inputuser} que has elegido para el")
-            print(f" servidor Tacacs con IPv{version} {ip_tacacs}")
-            print(f" no se encuentra activo.")
+                f" El puerto {tacacsport_inputuser} que has elegido para el"
+                + f" servidor Tacacs con IPv{version} {ip_tacacs}"
+                + f" no se encuentra activo.")
+
+            print(f" {blue}{'='*66}")
+            print(f" {green_blink} {('Precaucion '*6):^40}")
+            print(f" {blue}{'='*66}\n")
+            print(
+                f" {red}Se ha producido el siguiente {green}Error {red}>>\n")
+            print(
+                f" {red}*** El puerto {tacacsport_inputuser} que has elegido "
+                + f"para el Servidor Tacacs con IPv{version}{green}{ip_tacacs} {blue}no se ha determinado"
+                + f" el {green}puerto {red}***\n")
+
+            confirmation_err = input(
+                f" {blue}Deseas continuar {green}y/n {red}>> {green}")
+
+
 
     except KeyboardInterrupt:
         print(
